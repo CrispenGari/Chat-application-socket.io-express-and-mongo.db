@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script
+    src="https://code.jquery.com/jquery-3.5.0.js"
+    integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
+    crossorigin="anonymous"></script>
+    <script src="./socket.io/socket.io.js"></script>
+    <title>Chat App with MongoDB</title>
+</head>
+<style>
+    *{
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    fieldset{
+        width: 20%;
+        margin: auto;
+    }
+    .text{
+        width: 80%;
+        background-color: rgb(69, 69, 184);
+        color: black;
+        margin: 5px;
+        border-bottom-left-radius: 5px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        padding: 3px;
+        clear: both;
+    }
+    .text2{
+        min-width: 80%;
+        background-color: rgb(86, 211, 103);
+        color:black;
+        margin: 5px;
+        border-bottom-right-radius: 5px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        padding: 3px;
+        float: right;
+        clear: both;
+    }
+    .errorcontainer{
+        color: red;
+        font-size: 12px;
+        font-style: italic;
+        margin-top: 10px;
+    }
+    .Onlines{
+        width: 100%;
+        background: rgb(27, 27, 27);
+        font-size: 12px;
+        padding: 5px;
+        margin: 5px auto;
+        text-align: center;
+        color: white;
+    }
+    button{
+        float: right;
+        margin: 5px;
+    }
+    marquee{
+        background-color: rgb(27, 27, 27);
+        color: white;
+        font-size: 14px;
+    }
+    #chatroom{
+        display: none;
+    }
+
+</style>
+<script>
+    var socket = io('http://localhost:3123/')
+    let user;
+    function logIn(){
+        var username_=$('#username').val()
+        var pass =$('#password').val()
+        // the data that will be sent to a database
+        const dataLogin ={username:username_, password: pass}
+        socket.emit('database', dataLogin)
+        socket.emit('setUser', username_)
+        user = username_;
+        socket.on('userExist', data=>{
+            $('.errorcontainer').text(data)
+        })
+        socket.on('userSet',(data)=>{
+            $(".messageContainer").html(`
+            <marquee behavior="" direction=""><strong>${data}:</strong> is your username</marquee>
+            `)
+            $('#login').hide('fast')
+            $('#chatroom').show()
+
+        })
+    }
+    function sendMsg(){
+         var message = $('#massage').val();
+        $('#massage').val('')
+        socket.emit('Msg',{message: message, username: user})
+        socket.on('newmsg',(data)=>{
+            if(data.username==user){
+                $(".messageContainer").append('<div class="text2"><b> You:</b> ' +data.message+ '</div>')
+            }else{
+                $(".messageContainer").append('<div class="text"><b>'+data.username+ ":</b> "+data.message+ '</div>')
+            }
+        })
+    }
+    socket.on('nOnline',(data)=>{
+        $('.Onlines').text(data+ ' clients are online')
+    })
+</script>
+<body>
+    <div class="container">
+        <marquee behavior="" direction=""></marquee>
+        <fieldset id='login'>
+            <legend>LogIn</legend>
+            <form onsubmit="logIn()">
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter Username" name="username"> <br>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" placeholder="Enter Password">
+            <br>
+            <div class="errorcontainer" align=center>Error</div>
+            <br>
+            <button type="button" onclick="logIn()"> LogIn</button>
+        </form>
+        </fieldset>
+       
+            <fieldset id="chatroom">
+            <legend>CHATROOM</legend>
+            <div class="Onlines">
+            </div>
+            <form onsubmit="sendMsg()">
+            <textarea name="message" id="massage" cols="30" rows="3" placeholder="Type a message"></textarea>
+            <button type="button" onclick="sendMsg()"> Send</button>
+            <div class="messageContainer">
+            </div>
+        </form>
+        </fieldset>
+    </div>
+</body>
+</html>

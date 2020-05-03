@@ -1,0 +1,19 @@
+{
+  "name": "chat_application",
+  "version": "1.0.0",
+  "description": "A chat aplication that include node.js socket.io express and mongodb",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Crispen Gari",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "http": "0.0.1-security",
+    "mongodb": "^3.5.7",
+    "nodemon": "^2.0.3",
+    "socket.io": "^2.3.0"
+  }
+}
